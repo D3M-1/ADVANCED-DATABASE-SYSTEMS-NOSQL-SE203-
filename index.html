@@ -1,0 +1,1209 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>قواعد بيانات NoSQL — ملاحظات المحاضرات</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap">
+
+<style>
+:root {
+  --bg: #0d1117;
+  --surface: #161b22;
+  --surface2: #21262d;
+  --border: #30363d;
+  --text: #e6edf3;
+  --muted: #8b949e;
+  --accent: #58a6ff;
+  --accent-dark: #1f6feb;
+  --accent-light: #0d2341;
+  --green: #3fb950;
+  --green-bg: #0d2a1a;
+  --yellow: #d29922;
+  --yellow-bg: #2d2007;
+  --red: #f85149;
+  --red-bg: #2a0d0d;
+  --purple: #bc8cff;
+  --purple-bg: #1e1030;
+  --code-bg: #161b22;
+  --code-border: #30363d;
+  --tag-bg: #0d2341;
+  --tag-fg: #58a6ff;
+  --font: 'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif;
+  --mono: 'Fira Code', 'Consolas', 'Courier New', monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.8;
+  margin: 0;
+  padding-bottom: 60px;
+}
+
+/* ── Top bar ── */
+.topbar {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 24px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+}
+.topbar-title { font-size: 14px; font-weight: 700; color: var(--accent); }
+.topbar-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-family: var(--font); font-size: 12px; font-weight: 700;
+  padding: 6px 14px; border-radius: 6px; border: none; cursor: pointer;
+  transition: background 0.15s;
+}
+.btn-pdf { background: var(--accent); color: #fff; }
+.btn-pdf:hover { background: var(--accent-dark); }
+.btn-toc { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+.btn-toc:hover { background: var(--border); }
+
+/* ── Layout ── */
+.wrapper {
+  max-width: 900px; margin: 0 auto;
+  padding: 32px 24px;
+}
+
+/* ── Hero ── */
+.hero {
+  text-align: center; padding: 48px 24px 36px; margin-bottom: 40px;
+  background: linear-gradient(135deg, var(--accent-light) 0%, var(--surface) 100%);
+  border-radius: 16px; border: 1px solid var(--border);
+}
+.hero h1 {
+  font-size: 28px; font-weight: 800; color: var(--accent);
+  margin: 0 0 8px;
+}
+.hero p { color: var(--muted); font-size: 14px; margin: 0 0 16px; }
+.hero-tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.hero-tag {
+  background: var(--tag-bg); color: var(--tag-fg);
+  font-size: 12px; font-weight: 600;
+  padding: 4px 12px; border-radius: 20px; border: 1px solid var(--accent-dark);
+}
+
+/* ── TOC ── */
+#toc {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; padding: 20px 24px; margin-bottom: 40px;
+}
+#toc h2 { font-size: 14px; font-weight: 800; color: var(--accent); margin: 0 0 14px; }
+#toc ol { margin: 0; padding-right: 20px; padding-left: 0; }
+#toc li { margin-bottom: 6px; }
+#toc a {
+  color: var(--muted); text-decoration: none; font-size: 13px; font-weight: 500;
+  transition: color 0.15s;
+}
+#toc a:hover { color: var(--accent); }
+
+/* ── Lecture card ── */
+.lecture {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 14px; margin-bottom: 32px; overflow: hidden;
+}
+.lecture-header {
+  background: linear-gradient(90deg, var(--accent-light), transparent);
+  border-bottom: 1px solid var(--border);
+  padding: 18px 24px;
+  display: flex; align-items: center; gap: 14px;
+}
+.lecture-num {
+  background: var(--accent); color: #fff;
+  font-size: 11px; font-weight: 800; padding: 3px 10px;
+  border-radius: 20px; white-space: nowrap;
+}
+.lecture-title { font-size: 17px; font-weight: 800; color: var(--text); flex: 1; }
+.lecture-badge {
+  font-size: 11px; font-weight: 700; padding: 3px 10px;
+  border-radius: 20px; white-space: nowrap;
+}
+.badge-theory { background: var(--purple-bg); color: var(--purple); border: 1px solid var(--purple); }
+.badge-practical { background: var(--green-bg); color: var(--green); border: 1px solid var(--green); }
+.badge-setup { background: var(--yellow-bg); color: var(--yellow); border: 1px solid var(--yellow); }
+.badge-quiz { background: var(--red-bg); color: var(--red); border: 1px solid var(--red); }
+
+.lecture-body { padding: 24px; }
+
+/* ── Sections inside lecture ── */
+.lec-section { margin-bottom: 20px; }
+.lec-section-title {
+  font-size: 13px; font-weight: 800; color: var(--accent);
+  text-transform: uppercase; letter-spacing: 0.06em;
+  border-bottom: 1px solid var(--border); padding-bottom: 6px; margin-bottom: 12px;
+}
+.lec-section p { font-size: 14px; color: var(--text); margin: 0 0 10px; }
+.lec-section ul, .lec-section ol {
+  margin: 0 0 10px; padding-right: 20px; padding-left: 0;
+}
+.lec-section li { font-size: 14px; color: var(--text); margin-bottom: 6px; }
+
+/* ── Tip box ── */
+.tip-box {
+  border-radius: 8px; padding: 12px 16px; margin: 12px 0;
+  font-size: 13.5px; border-right: 3px solid;
+}
+.tip-box.info { background: var(--accent-light); border-color: var(--accent); color: var(--accent); }
+.tip-box.success { background: var(--green-bg); border-color: var(--green); color: var(--green); }
+.tip-box.warning { background: var(--yellow-bg); border-color: var(--yellow); color: var(--yellow); }
+.tip-box.note { background: var(--purple-bg); border-color: var(--purple); color: var(--purple); }
+.tip-box strong { font-weight: 800; }
+.tip-box p { margin: 0; color: inherit; }
+
+/* ── Code block ── */
+.code-block {
+  background: var(--code-bg); border: 1px solid var(--code-border);
+  border-radius: 8px; overflow: hidden; margin: 10px 0;
+}
+.code-header {
+  background: var(--surface2); padding: 6px 14px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid var(--code-border);
+}
+.code-lang { font-size: 11px; font-weight: 700; color: var(--accent); font-family: var(--mono); }
+.copy-btn {
+  background: none; border: none; cursor: pointer;
+  font-size: 11px; color: var(--muted); font-family: var(--font); font-weight: 600;
+  padding: 2px 8px; border-radius: 4px; transition: color 0.15s, background 0.15s;
+}
+.copy-btn:hover { background: var(--border); color: var(--text); }
+pre {
+  margin: 0; padding: 16px;
+  overflow-x: auto;
+  font-family: var(--mono);
+  font-size: 13px; line-height: 1.6;
+  color: #e6edf3;
+  direction: ltr; text-align: left;
+}
+code { font-family: var(--mono); }
+.inline-code {
+  background: var(--surface2); border: 1px solid var(--border);
+  padding: 1px 6px; border-radius: 4px; font-family: var(--mono);
+  font-size: 12.5px; color: var(--accent); direction: ltr;
+  display: inline-block;
+}
+
+/* ── Table ── */
+.table-wrap { overflow-x: auto; margin: 10px 0; }
+table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+th {
+  background: var(--surface2); color: var(--accent);
+  font-weight: 800; font-size: 12px; letter-spacing: 0.04em;
+  padding: 10px 14px; border: 1px solid var(--border); text-align: right;
+}
+td { padding: 9px 14px; border: 1px solid var(--border); vertical-align: top; color: var(--text); }
+tr:nth-child(even) td { background: var(--surface2); }
+
+/* ── Expert note ── */
+.expert-note {
+  background: linear-gradient(135deg, #1a1030, #0d1117);
+  border: 1px solid var(--purple);
+  border-radius: 10px; padding: 16px 20px; margin: 14px 0;
+}
+.expert-note .expert-label {
+  font-size: 11px; font-weight: 800; color: var(--purple);
+  text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px;
+}
+.expert-note p { font-size: 13.5px; color: var(--text); margin: 0; }
+
+/* ── Quiz summary ── */
+.quiz-card {
+  background: var(--red-bg); border: 1px solid var(--red);
+  border-radius: 10px; padding: 16px 20px; margin: 14px 0;
+}
+.quiz-card .quiz-label {
+  font-size: 11px; font-weight: 800; color: var(--red);
+  text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px;
+}
+.quiz-card .q-item { margin-bottom: 10px; }
+.quiz-card .q-text { font-size: 13.5px; color: var(--text); margin-bottom: 4px; }
+.quiz-card .q-answer {
+  font-size: 12.5px; background: var(--surface2);
+  border-radius: 6px; padding: 4px 10px;
+  color: var(--green); font-family: var(--mono);
+  display: inline-block; direction: ltr;
+}
+
+/* ── Print ── */
+@media print {
+  .topbar { display: none !important; }
+  .lecture { page-break-inside: avoid; border: 1px solid #ccc; }
+  body { background: #fff; color: #000; }
+  .code-block pre { background: #f5f5f5; color: #000; border: 1px solid #ccc; }
+  .tip-box, .expert-note, .quiz-card { border: 1px solid #ccc !important; background: #f9f9f9 !important; color: #000 !important; }
+  pre { font-size: 11px; }
+  .hero { background: #f0f4ff !important; border: 1px solid #ccc; }
+}
+@media (max-width: 600px) {
+  .wrapper { padding: 16px; }
+  .lecture-header { flex-wrap: wrap; }
+  .lecture-title { font-size: 15px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Top Bar -->
+<div class="topbar">
+  <span class="topbar-title">📚 قواعد بيانات NoSQL — MongoDB</span>
+  <div class="topbar-actions">
+    <button class="btn btn-toc" onclick="document.getElementById('toc').scrollIntoView({behavior:'smooth'})">📋 جدول المحتوى</button>
+    <button class="btn btn-pdf" onclick="printPDF()">🖨️ طباعة / PDF</button>
+  </div>
+</div>
+
+<div class="wrapper">
+
+<!-- Hero -->
+<div class="hero">
+  <h1>📚 قواعد بيانات NoSQL</h1>
+  <p>ملاحظات محاضرات أكاديمية شاملة — مُنظَّمة حسب المحاضرات بالترتيب</p>
+  <div class="hero-tags">
+    <span class="hero-tag">MongoDB</span>
+    <span class="hero-tag">JSON</span>
+    <span class="hero-tag">NoSQL</span>
+    <span class="hero-tag">Cloud Atlas</span>
+    <span class="hero-tag">Aggregation</span>
+    <span class="hero-tag">Python + PyMongo</span>
+    <span class="hero-tag">6 محاضرات + عملي</span>
+  </div>
+</div>
+
+<!-- TOC -->
+<div id="toc">
+  <h2>📋 جدول المحتوى</h2>
+  <ol>
+    <li><a href="#lec1">المحاضرة 1 — مقدمة إلى NoSQL وأنواعه</a></li>
+    <li><a href="#lec2">المحاضرة 2 — إعداد MongoDB Atlas السحابي</a></li>
+    <li><a href="#lec3">المحاضرة 3 — MongoDB Compass وVS Code</a></li>
+    <li><a href="#lec4">المحاضرة 4 — JSON: الصيغة والمعايير</a></li>
+    <li><a href="#lec5">المحاضرة 5 — عوامل الاستعلام (Query Operators)</a></li>
+    <li><a href="#lec-p4">عملي 4 — عمليات CRUD الأساسية</a></li>
+    <li><a href="#lec-p5">عملي 5 — الفهارس والحذف والإسقاط والترتيب</a></li>
+    <li><a href="#lec6">المحاضرة 6 — إطار التجميع (Aggregation Framework)</a></li>
+    <li><a href="#lec7">المحاضرة 7 — Python وPyMongo (تطبيق متقدم)</a></li>
+    <li><a href="#quiz-summary">ملخص كويزات الكورس</a></li>
+  </ol>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     LECTURE 1
+════════════════════════════════════════════════════════ -->
+<div class="lecture" id="lec1">
+  <div class="lecture-header">
+    <span class="lecture-num">المحاضرة 1</span>
+    <span class="lecture-title">مقدمة إلى قواعد بيانات NoSQL</span>
+    <span class="lecture-badge badge-theory">نظري</span>
+  </div>
+  <div class="lecture-body">
+
+    <div class="lec-section">
+      <div class="lec-section-title">🎯 دورة حياة تصميم قواعد البيانات</div>
+      <p>قبل اختيار أي نوع من قواعد البيانات يجب أن تمر بالمراحل الثلاث التالية:</p>
+      <ul>
+        <li><strong>الاستقصاء (Investigation):</strong> تحديد متطلبات البيانات والمستخدمين والعمليات.</li>
+        <li><strong>التصميم (Design):</strong> رسم مخطط البيانات (ERD) وتحديد العلاقات والقيود.</li>
+        <li><strong>التنفيذ (Implementation):</strong> بناء قاعدة البيانات الفعلية وملؤها بالبيانات.</li>
+      </ul>
+      <div class="tip-box warning">
+        <p><strong>💡 ملاحظة خبير:</strong> مرحلة التصميم هي الأهم — أي خطأ هنا يُكلّف جهدًا مضاعفًا لاحقًا. خذ وقتك في رسم ERD واضح قبل كتابة أي كود.</p>
+      </div>
+    </div>
+
+    <div class="lec-section">
+      <div class="lec-section-title">⚠️ مشاكل قواعد البيانات العلائقية (Relational)</div>
+      <ul>
+        <li><strong>الخاصية متعددة القيم (Multivalued Attribute):</strong> مثل موظف لديه أكثر من رقم هاتف — في SQL يحتاج جدولًا إضافيًا، أما في NoSQL فيُخزَّن كـ Array مباشرةً.</li>
+        <li><strong>محدودية التوسع الأفقي (Scaling Limitations):</strong> SQL يصعب توزيعه على عدة خوادم (Horizontal Scaling)، بينما NoSQL صُمِّم لهذا الغرض أصلًا.</li>
+        <li><strong>البيانات غير المنظمة:</strong> السجلات الطبية، الصور، السجلات الاجتماعية — صعبة الجدولة في SQL.</li>
+      </ul>
+    </div>
+
+    <div class="lec-section">
+      <div class="lec-section-title">🗂️ أنواع قواعد بيانات NoSQL الأربعة</div>
+      <div class="table-wrap">
+        <table>
+          <tr><th>النوع</th><th>الوصف</th><th>مثال</th><th>حالة استخدام</th></tr>
+          <tr><td><strong>Key-Value</strong></td><td>كل سجل هو مفتاح وقيمة</td><td>Redis, DynamoDB</td><td>تخزين الجلسات، الكاش</td></tr>
+          <tr><td><strong>Document</strong></td><td>مستندات JSON مرنة</td><td><strong>MongoDB</strong>, Couchbase</td><td>تطبيقات الويب، كتالوجات</td></tr>
+          <tr><td><strong>Wide-Column</strong></td><td>جداول بأعمدة مرنة</td><td>Cassandra, HBase</td><td>بيانات ضخمة، IoT</td></tr>
+          <tr><td><strong>Graph</strong></td><td>عقد وحواف (العلاقات محورية)</td><td>Neo4j, Amazon Neptune</td><td>الشبكات الاجتماعية</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="lec-section">
+      <div class="lec-section-title">🍃 لماذا MongoDB؟</div>
+      <ul>
+        <li>تخزين البيانات في <strong>مستندات BSON</strong> (Binary JSON) — أسرع من JSON النصي.</li>
+        <li><strong>مخطط مرن (Schemaless)</strong>: لا حاجة لتعريف الأعمدة مسبقًا.</li>
+        <li><strong>قابلية التوسع الأفقي</strong> عبر Sharding — توزيع البيانات على عدة خوادم.</li>
+        <li>دعم <strong>النسخ المتماثل (Replication)</strong> — ضمان الاستمرارية.</li>
+        <li>يستخدم لغة استعلام شبيهة بـ JavaScript — سهل على مطوري الويب.</li>
+      </ul>
+      <div class="expert-note">
+        <div class="expert-label">🏆 توصية الخبير</div>
+        <p>MongoDB هو الخيار المثالي لتطبيقات الويب الحديثة (MEAN Stack / MERN Stack) لأنه يتحدث "لغة JSON" كما يفعل JavaScript — مما يجعل البيانات تتدفق بسلاسة من قاعدة البيانات إلى الواجهة الأمامية بدون تحويلات معقدة.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     LECTURE 2
+════════════════════════════════════════════════════════ -->
+<div class="lecture" id="lec2">
+  <div class="lecture-header">
+    <span class="lecture-num">المحاضرة 2</span>
+    <span class="lecture-title">إعداد MongoDB Atlas السحابي</span>
+    <span class="lecture-badge badge-setup">إعداد</span>
+  </div>
+  <div class="lecture-body">
+
+    <div class="lec-section">
+      <div class="lec-section-title">☁️ ما هو MongoDB Atlas؟</div>
+      <p>MongoDB Atlas هو الخدمة السحابية الرسمية لـ MongoDB — تتيح لك إنشاء قاعدة بيانات في السحابة مجانًا دون الحاجة لتثبيت أي شيء على جهازك.</p>
+      <div class="tip-box success">
+        <p><strong>✅ الطبقة المجانية M0:</strong> تمنحك 512 MB مجانًا — كافية تمامًا للتعلم ومشاريع الكورس.</p>
+      </div>
+    </div>
+
+    <div class="lec-section">
+      <div class="lec-section-title">🔧 خطوات الإعداد</div>
+      <ol>
+        <li>اذهب إلى <strong>mongodb.com/cloud/atlas</strong> وأنشئ حسابًا مجانيًا.</li>
+        <li>اختر <strong>Create a Free Cluster</strong> ← الطبقة M0 (مجانية).</li>
+        <li>اختر مزود السحابة: <strong>AWS</strong> والمنطقة: <strong>Bahrain (me-south-1)</strong> — الأقرب للمنطقة العربية.</li>
+        <li>في <strong>Security Quickstart</strong>: أنشئ مستخدمًا وكلمة مرور لقاعدة البيانات.</li>
+        <li>في <strong>Network Access</strong>: أضف عنوان IP الخاص بك أو اختر <span class="inline-code">0.0.0.0/0</span> للسماح لأي IP (للتعلم فقط).</li>
+        <li>في <strong>Load Sample Dataset</strong>: حمّل بيانات تجريبية جاهزة للاستكشاف الفوري.</li>
+      </ol>
+      <div class="tip-box warning">
+        <p><strong>⚠️ تحذير أمني:</strong> في بيئات الإنتاج الحقيقية لا تستخدم <span class="inline-code">0.0.0.0/0</span> أبدًا — قيّد الوصول بعناوين IP محددة فقط.</p>
+      </div>
+    </div>
+
+    <div class="lec-section">
+      <div class="lec-section-title">🔗 نسخة Connection String</div>
+      <p>بعد إنشاء الـ Cluster ستحصل على رابط الاتصال:</p>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">Connection String</span>
+          <button class="copy-btn" onclick="copyCode(this)">نسخ</button>
+        </div>
+        <pre>mongodb+srv://&lt;username&gt;:&lt;password&gt;@cluster0.xxxxx.mongodb.net/&lt;dbname&gt;</pre>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     LECTURE 3
+════════════════════════════════════════════════════════ -->
+<div class="lecture" id="lec3">
+  <div class="lecture-header">
+    <span class="lecture-num">المحاضرة 3</span>
+    <span class="lecture-title">MongoDB Compass وVS Code</span>
+    <span class="lecture-badge badge-setup">أدوات</span>
+  </div>
+  <div class="lecture-body">
+
+    <div class="lec-section">
+      <div class="lec-section-title">🧭 MongoDB Compass</div>
+      <p>Compass هو واجهة رسومية (GUI) تتيح لك التعامل مع MongoDB بدون كتابة أوامر نصية. تنزيله مجاني من <strong>mongodb.com/products/compass</strong>.</p>
+      <ul>
+        <li>تصفح المجموعات (Collections) والمستندات (Documents) بشكل بصري.</li>
+        <li>تشغيل الاستعلامات وعرض النتائج كجدول أو JSON.</li>
+        <li>تحليل هيكل البيانات وعرض الإحصاءات الفورية.</li>
+        <li>استيراد وتصدير البيانات (JSON, CSV).</li>
+      </ul>
+      <div class="tip-box info">
+        <p><strong>💡 نصيحة:</strong> استخدم Compass في البداية لفهم هيكل البيانات بشكل بصري، ثم انتقل إلى كتابة الأوامر مباشرة — هذا التسلسل يبني الفهم بشكل أعمق.</p>
+      </div>
+    </div>
+
+    <div class="lec-section">
+      <div class="lec-section-title">💻 إضافة MongoDB في VS Code</div>
+      <ol>
+        <li>افتح VS Code → Extensions (<span class="inline-code">Ctrl+Shift+X</span>).</li>
+        <li>ابحث عن <strong>"MongoDB for VS Code"</strong> من MongoDB Inc. وثبّتها.</li>
+        <li>من شريط النشاط اليساري اضغط على أيقونة MongoDB.</li>
+        <li>انقر <strong>"Add Connection"</strong> والصق Connection String من Atlas.</li>
+        <li>يمكنك الآن تشغيل استعلامات MongoDB مباشرةً داخل VS Code!</li>
+      </ol>
+      <div class="expert-note">
+        <div class="expert-label">🏆 توصية الخبير</div>
+        <p>الجمع بين Atlas + Compass + VS Code هو الثلاثي الذهبي للتطوير. Atlas لتخزين البيانات في السحابة، Compass للاستكشاف البصري، وVS Code لكتابة الكود — كل أداة في مكانها المثالي.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     LECTURE 4
+════════════════════════════════════════════════════════ -->
+<div class="lecture" id="lec4">
+  <div class="lecture-header">
+    <span class="lecture-num">المحاضرة 4</span>
+    <span class="lecture-title">JSON — الصيغة والمعايير الدولية</span>
+    <span class="lecture-badge badge-theory">نظري</span>
+  </div>
+  <div class="lecture-body">
+
+    <div class="lec-section">
+      <div class="lec-section-title">📄 ما هو JSON؟</div>
+      <p><strong>JSON (JavaScript Object Notation)</strong> هو تنسيق نصي لتبادل البيانات — خفيف، قابل للقراءة البشرية، ومستقل عن لغة البرمجة. أصبح المعيار الأكثر استخدامًا لتبادل البيانات بين التطبيقات.</p>
+    </div>
+
+    <div class="lec-section">
+      <div class="lec-section-title">📐 قواعد صياغة JSON</div>
+      <ul>
+        <li>البيانات تُكتب في أزواج <span class="inline-code">"مفتاح": قيمة</span></li>
+        <li>المفاتيح دائمًا بين علامات تنصيص مزدوجة <span class="inline-code">"key"</span></li>
+        <li>الكائنات محاطة بـ أقواس معقوفة <span class="inline-code">{ }</span></li>
+        <li>المصفوفات محاطة بـ أقواس مربعة <span class="inline-code">[ ]</span></li>
+        <li>القيم تُفصل بفاصلة <span class="inline-code">,</span> (لا فاصلة بعد آخر عنصر)</li>
+        <li>حساسة لحالة الأحرف: <span class="inline-code">"Name"</span> ≠ <span class="inline-code">"name"</span></li>
+      </ul>
+    </div>
+
+    <div class="lec-section">
+      <div class="lec-section-title">🔢 أنواع البيانات الستة في JSON</div>
+      <div class="table-wrap">
+        <table>
+          <tr><th>النوع</th><th>مثال</th><th>ملاحظة</th></tr>
+          <tr><td><strong>String</strong></td><td><span class="inline-code">"أحمد"</span></td><td>نصوص بين علامات تنصيص</td></tr>
+          <tr><td><strong>Number</strong></td><td><span class="inline-code">25</span> أو <span class="inline-code">1500.5</span></td><td>بدون تنصيص، يشمل الأعداد العشرية</td></tr>
+          <tr><td><strong>Boolean</strong></td><td><span class="inline-code">true</span> / <span class="inline-code">false</span></td><td>بالأحرف الصغيرة دائمًا</td></tr>
+          <tr><td><strong>Array</strong></td><td><span class="inline-code">["Java", "Python"]</span></td><td>قائمة مرتبة من القيم</td></tr>
+          <tr><td><strong>Object</strong></td><td><span class="inline-code">{"city": "Cairo"}</span></td><td>كائن متداخل</td></tr>
+          <tr><td><strong>Null</strong></td><td><span class="inline-code">null</span></td><td>يمثل قيمة فارغة أو غير معروفة</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="lec-section">
+      <div class="lec-section-title">📝 مثال عملي: مستند موظف</div>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">JSON</span>
+          <button class="copy-btn" onclick="copyCode(this)">نسخ</button>
+        </div>
+        <pre>{
+  "ssn": "1234",
+  "fname": "Ahmed",
+  "lname": "Ali",
+  "dno": 5,
+  "salary": 25000,
+  "gender": "M",
+  "address": {
+    "city": "Cairo",
+    "street": "Tahrir Square"
+  },
+  "phones": ["+201001234567", "+201112345678"],
+  "isManager": false,
+  "joinDate": "2020-03-15"
+}</pre>
+      </div>
+      <div class="tip-box success">
+        <p><strong>✅ لاحظ:</strong> حقل <span class="inline-code">phones</span> هو مصفوفة — مشكلة "الخاصية متعددة القيم" في SQL محلولة بسطر واحد في MongoDB!</p>
+      </div>
+    </div>
+
+    <div class="lec-section">
+      <div class="lec-section-title">🌐 معايير JSON الدولية</div>
+      <ul>
+        <li><strong>RFC 7159 / ECMA-404:</strong> المعيار الرسمي لصياغة JSON.</li>
+        <li><strong>Google JSON Style Guide:</strong> مرجع محترف لكتابة JSON بشكل موحد في المشاريع الكبيرة.</li>
+        <li><strong>noBackend Architecture:</strong> نمط معماري يستخدم JSON API مباشرةً دون Middleware.</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     LECTURE 5
+════════════════════════════════════════════════════════ -->
+<div class="lecture" id="lec5">
+  <div class="lecture-header">
+    <span class="lecture-num">المحاضرة 5</span>
+    <span class="lecture-title">عوامل الاستعلام — Query Operators</span>
+    <span class="lecture-badge badge-theory">نظري</span>
+  </div>
+  <div class="lecture-body">
+
+    <div class="lec-section">
+      <div class="lec-section-title">🔍 عوامل المقارنة (Comparison Operators)</div>
+      <div class="table-wrap">
+        <table>
+          <tr><th>العامل</th><th>المعنى</th><th>مثال</th></tr>
+          <tr><td><span class="inline-code">$gt</span></td><td>أكبر من (greater than)</td><td><span class="inline-code">{salary: {$gt: 5000}}</span></td></tr>
+          <tr><td><span class="inline-code">$gte</span></td><td>أكبر من أو يساوي</td><td><span class="inline-code">{age: {$gte: 18}}</span></td></tr>
+          <tr><td><span class="inline-code">$lt</span></td><td>أصغر من (less than)</td><td><span class="inline-code">{price: {$lt: 100}}</span></td></tr>
+          <tr><td><span class="inline-code">$lte</span></td><td>أصغر من أو يساوي</td><td><span class="inline-code">{dno: {$lte: 5}}</span></td></tr>
+          <tr><td><span class="inline-code">$ne</span></td><td>لا يساوي (not equal)</td><td><span class="inline-code">{gender: {$ne: "M"}}</span></td></tr>
+          <tr><td><span class="inline-code">$eq</span></td><td>يساوي (equal) — الافتراضي</td><td><span class="inline-code">{dno: {$eq: 8}}</span></td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="lec-section">
+      <div class="lec-section-title">🔗 عوامل منطقية (Logical Operators)</div>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">MongoDB — $or و $and</span>
+          <button class="copy-btn" onclick="copyCode(this)">نسخ</button>
+        </div>
+        <pre>// $or: موظفون في قسم 5 أو راتبهم أكبر من 30000
+db.employee.find({
+  $or: [
+    {"dno": 5},
+    {"salary": {$gt: 30000}}
+  ]
+})
+
+// $and: موظفون في قسم 8 وجنسهم ذكر
+db.employee.find({
+  $and: [
+    {"dno": 8},
+    {"gender": "M"}
+  ]
+})
+
+// الاختصار لـ $and (الكتابة المدمجة)
+db.employee.find({"dno": 8, "gender": "M"})</pre>
+      </div>
+      <div class="tip-box info">
+        <p><strong>💡 اختصار مفيد:</strong> عند استخدام <span class="inline-code">$and</span> على حقول مختلفة يمكنك كتابة الشرطين في نفس الكائن مباشرةً — MongoDB يفهمها كـ AND تلقائيًا.</p>
+      </div>
+    </div>
+
+    <div class="lec-section">
+      <div class="lec-section-title">📦 عوامل المصفوفات (Array Operators)</div>
+      <div class="table-wrap">
+        <table>
+          <tr><th>العامل</th><th>المعنى</th><th>مثال</th></tr>
+          <tr><td><span class="inline-code">$in</span></td><td>القيمة ضمن قائمة</td><td><span class="inline-code">{dno: {$in: [4, 5, 7]}}</span></td></tr>
+          <tr><td><span class="inline-code">$nin</span></td><td>القيمة ليست في القائمة</td><td><span class="inline-code">{dno: {$nin: [1, 2]}}</span></td></tr>
+          <tr><td><span class="inline-code">$all</span></td><td>المصفوفة تحتوي كل القيم</td><td><span class="inline-code">{skills: {$all: ["Python","Java"]}}</span></td></tr>
+          <tr><td><span class="inline-code">$not</span></td><td>عكس الشرط</td><td><span class="inline-code">{salary: {$not: {$gt: 5000}}}</span></td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="lec-section">
+      <div class="lec-section-title">❓ عامل الوجود (Existence Operator)</div>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">MongoDB — $exists</span>
+          <button class="copy-btn" onclick="copyCode(this)">نسخ</button>
+        </div>
+        <pre>// البحث عن المستندات التي يوجد فيها حقل "supervisor"
+db.employee.find({"supervisor": {$exists: true}})
+
+// البحث عن التي لا يوجد فيها الحقل
+db.employee.find({"supervisor": {$exists: false}})</pre>
+      </div>
+    </div>
+
+    <div class="expert-note">
+      <div class="expert-label">🏆 قاعدة ذهبية لكتابة الفلاتر</div>
+      <p>الصيغة الصحيحة دائمًا: <span class="inline-code">{"field": {$operator: value}}</span> — المفتاح اسم الحقل، والقيمة كائن يبدأ بـ <span class="inline-code">$</span>. أي فلتر لا يتبع هذه الصيغة خاطئ بالضرورة.</p>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     PRACTICAL 4
+════════════════════════════════════════════════════════ -->
+<div class="lecture" id="lec-p4">
+  <div class="lecture-header">
+    <span class="lecture-num">عملي 4</span>
+    <span class="lecture-title">عمليات CRUD الأساسية</span>
+    <span class="lecture-badge badge-practical">عملي</span>
+  </div>
+  <div class="lecture-body">
+
+    <div class="lec-section">
+      <div class="lec-section-title">➕ إدخال البيانات</div>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">MongoDB — Insert</span>
+          <button class="copy-btn" onclick="copyCode(this)">نسخ</button>
+        </div>
+        <pre>// إنشاء مجموعة جديدة
+db.createCollection("employee")
+
+// إدراج مستند واحد
+db.employee.insertOne({
+  "ssn": "1234",
+  "fname": "Ahmed",
+  "lname": "Ali",
+  "dno": 5,
+  "salary": 25000,
+  "gender": "M"
+})
+
+// إدراج عدة مستندات
+db.employee.insertMany([
+  {"ssn": "5678", "fname": "Sara", "dno": 8, "salary": 30000, "gender": "F"},
+  {"ssn": "9012", "fname": "Omar", "dno": 5, "salary": 22000, "gender": "M"}
+])</pre>
+      </div>
+    </div>
+
+    <div class="lec-section">
+      <div class="lec-section-title">✏️ تحديث البيانات</div>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">MongoDB — Update</span>
+          <button class="copy-btn" onclick="copyCode(this)">نسخ</button>
+        </div>
+        <pre>// $set: تعديل قيمة حقل موجود أو إضافة حقل جديد
+db.employee.updateMany(
+  {"dno": 5},                        // شرط التصفية
+  {$set: {"salary": 28000}}          // التعديل
+)
+
+// $unset: حذف حقل من المستند
+db.employee.updateMany(
+  {},                                // {} = جميع المستندات
+  {$unset: {"supervisor": ""}}
+)
+
+// تحديث بشرط مركب
+db.employee.updateMany(
+  {$or: [{"dno": {$gte: 14, $lte: 16}}, {"salary": 25000}]},
+  {$set: {"join_date": ""}}
+)</pre>
+      </div>
+      <div class="tip-box warning">
+        <p><strong>⚠️ تحذير:</strong> استخدام <span class="inline-code">{}</span> كفلتر يُطبّق التعديل على <strong>جميع المستندات</strong> في المجموعة — تأكد دائمًا من الفلتر قبل التنفيذ.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     PRACTICAL 5
+════════════════════════════════════════════════════════ -->
+<div class="lecture" id="lec-p5">
+  <div class="lecture-header">
+    <span class="lecture-num">عملي 5</span>
+    <span class="lecture-title">الفهارس · الحذف · الإسقاط · الترتيب</span>
+    <span class="lecture-badge badge-practical">عملي</span>
+  </div>
+  <div class="lecture-body">
+
+    <div class="lec-section">
+      <div class="lec-section-title">📑 الفهارس (Indexes)</div>
+      <p>الفهرس يُسرّع عمليات البحث بشكل كبير — كفهرس الكتاب. بدون فهرس، MongoDB تبحث في كل المستندات (Full Collection Scan).</p>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">MongoDB — Indexes</span>
+          <button class="copy-btn" onclick="copyCode(this)">نسخ</button>
+        </div>
+        <pre>// إنشاء فهرس بسيط (1 = تصاعدي، -1 = تنازلي)
+db.project.createIndex({"pnumber": 1})
+
+// فهرس مركب باسم مخصص
+db.project.createIndex(
+  {"pnumber": 1, "Pname": -1},
+  {"name": "pno_name"}
+)
+
+// فهرس فريد (Unique Index) — يمنع التكرار
+db.employee.createIndex(
+  {"ssn": 1, "fname": -1},
+  {"name": "emp_name", "unique": true}
+)
+
+// عرض جميع الفهارس
+db.project.getIndexes()
+
+// حذف فهرس بالاسم
+db.project.dropIndex("pno_name")</pre>
+      </div>
+      <div class="expert-note">
+        <div class="expert-label">🏆 توصية الخبير — متى تستخدم الفهارس؟</div>
+        <p>أضف فهارس على الحقول التي تُستخدم كثيرًا في الفلاتر والترتيب. لكن لا تبالغ — كل فهرس يستهلك مساحة ويُبطئ عمليات الإدراج. القاعدة: فهرس واحد لكل حقل يُستعلم عنه بشكل متكرر.</p>
+      </div>
+    </div>
+
+    <div class="lec-section">
+      <div class="lec-section-title">🗑️ الحذف (Delete)</div>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">MongoDB — Delete</span>
+          <button class="copy-btn" onclick="copyCode(this)">نسخ</button>
+        </div>
+        <pre>// حذف مستند واحد (الأول الذي يطابق الشرط)
+db.sales.deleteOne({"_id": 1})
+
+// حذف مستندات متعددة
+db.sales.deleteMany({"_id": {$lte: 5}})
+
+// حذف جميع المستندات (احذر!)
+db.sales.deleteMany({})</pre>
+      </div>
+    </div>
+
+    <div class="lec-section">
+      <div class="lec-section-title">🎯 الإسقاط (Projection)</div>
+      <p>Projection يُحدد الحقول التي تريد إظهارها أو إخفاءها في النتائج. <span class="inline-code">1</span> = أظهر، <span class="inline-code">0</span> = أخفِ.</p>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">MongoDB — Projection</span>
+          <button class="copy-btn" onclick="copyCode(this)">نسخ</button>
+        </div>
+        <pre>// إظهار fname و lname فقط (وإخفاء _id)
+db.employee.find(
+  {"dno": 8},                              // الفلتر
+  {"_id": 0, "fname": 1, "lname": 1}      // الإسقاط
+)
+
+// إخفاء حقل salary فقط
+db.employee.find({}, {"salary": 0})</pre>
+      </div>
+    </div>
+
+    <div class="lec-section">
+      <div class="lec-section-title">📊 الترتيب والحد والعدّ</div>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">MongoDB — Sort · Limit · Count</span>
+          <button class="copy-btn" onclick="copyCode(this)">نسخ</button>
+        </div>
+        <pre>// ترتيب تصاعدي (1) أو تنازلي (-1)
+db.employee.find({"dno": 8}).sort({"salary": -1})
+
+// تحديد عدد النتائج
+db.employee.find({"dno": 8}).limit(5)
+
+// تخطي نتائج (للصفحات)
+db.employee.find().skip(10).limit(5)
+
+// عدّ المستندات
+db.employee.find({"dno": 8}).count()
+// أو
+db.employee.countDocuments({"dno": 8})
+
+// الجمع بين الكل
+db.employee.find(
+  {"dno": 8},
+  {"fname": 1, "salary": 1, "_id": 0}
+).sort({"salary": -1}).limit(3)</pre>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     LECTURE 6
+════════════════════════════════════════════════════════ -->
+<div class="lecture" id="lec6">
+  <div class="lecture-header">
+    <span class="lecture-num">المحاضرة 6</span>
+    <span class="lecture-title">إطار التجميع — Aggregation Framework</span>
+    <span class="lecture-badge badge-theory">متقدم</span>
+  </div>
+  <div class="lecture-body">
+
+    <div class="lec-section">
+      <div class="lec-section-title">🔄 ما هو Aggregation Pipeline؟</div>
+      <p>Pipeline التجميع يُعالج المستندات عبر سلسلة من المراحل (Stages) — كل مرحلة تُحوّل البيانات وتُمرّرها للمرحلة التالية. مكافئ لـ <span class="inline-code">GROUP BY + HAVING</span> في SQL.</p>
+    </div>
+
+    <div class="lec-section">
+      <div class="lec-section-title">📊 أولًا: التجميع الأساسي بـ $group</div>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">MongoDB — $group</span>
+          <button class="copy-btn" onclick="copyCode(this)">نسخ</button>
+        </div>
+        <pre>// متوسط الرواتب لكل قسم
+db.employee.aggregate([
+  {$group: {
+    _id: "$dno",
+    avgSalary: {$avg: "$salary"},
+    maxSalary: {$max: "$salary"},
+    minSalary: {$min: "$salary"},
+    totalSalary: {$sum: "$salary"},
+    count: {$sum: 1}
+  }}
+])</pre>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <tr><th>الدالة</th><th>المعنى</th></tr>
+          <tr><td><span class="inline-code">$avg</span></td><td>المتوسط الحسابي</td></tr>
+          <tr><td><span class="inline-code">$sum</span></td><td>المجموع (أو <span class="inline-code">$sum: 1</span> للعدّ)</td></tr>
+          <tr><td><span class="inline-code">$max</span></td><td>أكبر قيمة</td></tr>
+          <tr><td><span class="inline-code">$min</span></td><td>أصغر قيمة</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="lec-section">
+      <div class="lec-section-title">🔗 ثانيًا: التجميع حسب حقول متعددة</div>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">MongoDB — $group متعدد</span>
+          <button class="copy-btn" onclick="copyCode(this)">نسخ</button>
+        </div>
+        <pre>// التجميع حسب القسم والجنس معًا
+db.employee.aggregate([
+  {$group: {
+    _id: {dno_id: "$dno", gender_id: "$gender"},
+    totalSalary: {$sum: "$salary"}
+  }}
+])</pre>
+      </div>
+    </div>
+
+    <div class="lec-section">
+      <div class="lec-section-title">🎯 ثالثًا: $match قبل $group (فلترة البيانات)</div>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">MongoDB — $match + $group</span>
+          <button class="copy-btn" onclick="copyCode(this)">نسخ</button>
+        </div>
+        <pre>// الأقسام التي يزيد موظفوها عن 4 (يعادل HAVING في SQL)
+db.employee.aggregate([
+  {$group: {
+    _id: "$dno",
+    count: {$sum: 1}
+  }},
+  {$match: {"count": {$gt: 4}}}
+])</pre>
+      </div>
+      <div class="tip-box info">
+        <p><strong>💡 ترتيب المراحل مهم:</strong> <span class="inline-code">$match</span> <strong>قبل</strong> <span class="inline-code">$group</span> = فلترة المستندات الأصلية (WHERE). <span class="inline-code">$match</span> <strong>بعد</strong> <span class="inline-code">$group</span> = فلترة نتائج التجميع (HAVING).</p>
+      </div>
+    </div>
+
+    <div class="lec-section">
+      <div class="lec-section-title">🔀 رابعًا: $sort مع $group</div>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">MongoDB — $sort + $group</span>
+          <button class="copy-btn" onclick="copyCode(this)">نسخ</button>
+        </div>
+        <pre>// ترتيب الأقسام حسب _id تصاعديًا
+db.employee.aggregate([
+  {$group: {_id: "$dno", avgSal: {$avg: "$salary"}}},
+  {$sort: {"_id": 1}}   // 1 = تصاعدي، -1 = تنازلي
+])</pre>
+      </div>
+    </div>
+
+    <div class="lec-section">
+      <div class="lec-section-title">🔗 خامسًا: $lookup (يعادل LEFT OUTER JOIN)</div>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">MongoDB — $lookup</span>
+          <button class="copy-btn" onclick="copyCode(this)">نسخ</button>
+        </div>
+        <pre>// ربط الموظفين بأقسامهم
+db.employee.aggregate([
+  {$lookup: {
+    from: "department",      // اسم المجموعة الأخرى
+    localField: "dno",       // حقل الربط في المجموعة الحالية
+    foreignField: "dnumber", // الحقل المقابل في المجموعة الأخرى
+    as: "employee_dept"      // اسم الحقل الجديد (يُخزن كـ Array)
+  }}
+])</pre>
+      </div>
+      <div class="expert-note">
+        <div class="expert-label">🏆 توصية الخبير</div>
+        <p><span class="inline-code">$lookup</span> يُعيد البيانات المرتبطة كـ Array — استخدم <span class="inline-code">$unwind</span> بعده إذا أردت تحويل كل عنصر في المصفوفة إلى مستند منفصل، تمامًا كما تفعل JOIN في SQL.</p>
+      </div>
+    </div>
+
+    <div class="lec-section">
+      <div class="lec-section-title">📐 سادسًا: $project (الإسقاط بعد التجميع)</div>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">MongoDB — $project</span>
+          <button class="copy-btn" onclick="copyCode(this)">نسخ</button>
+        </div>
+        <pre>// إخفاء _id و date بعد الربط
+db.employee.aggregate([
+  {$lookup: {
+    from: "department",
+    localField: "dno",
+    foreignField: "dnumber",
+    as: "employee_dept"
+  }},
+  {$project: {"_id": 0, "date": 0}}
+])</pre>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     LECTURE 7 — Python + PyMongo
+════════════════════════════════════════════════════════ -->
+<div class="lecture" id="lec7">
+  <div class="lecture-header">
+    <span class="lecture-num">المحاضرة 7</span>
+    <span class="lecture-title">Python وPyMongo — تطبيق MongoDB ببايثون</span>
+    <span class="lecture-badge badge-practical">متقدم</span>
+  </div>
+  <div class="lecture-body">
+
+    <div class="lec-section">
+      <div class="lec-section-title">🐍 أساسيات بايثون السريعة</div>
+      <p>قبل الوصول إلى PyMongo، هذه مراجعة سريعة لأساسيات بايثون المطلوبة:</p>
+      <div class="table-wrap">
+        <table>
+          <tr><th>المفهوم</th><th>مثال سريع</th></tr>
+          <tr><td>المتغيرات والطباعة</td><td><span class="inline-code">name = "Ahmed"; print(name)</span></td></tr>
+          <tr><td>القوائم (Lists)</td><td><span class="inline-code">courses = ['mongodb', 'python']</span></td></tr>
+          <tr><td>القواميس (Dicts)</td><td><span class="inline-code">emp = {'name': 'Ali', 'age': 25}</span></td></tr>
+          <tr><td>الحلقات</td><td><span class="inline-code">for item in courses: print(item)</span></td></tr>
+          <tr><td>الدوال</td><td><span class="inline-code">def greet(name): return f"Hello {name}"</span></td></tr>
+          <tr><td>معالجة الأخطاء</td><td><span class="inline-code">try: ... except Exception as e: print(e)</span></td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="lec-section">
+      <div class="lec-section-title">🔌 الاتصال بـ MongoDB من بايثون</div>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">Python — PyMongo Connection</span>
+          <button class="copy-btn" onclick="copyCode(this)">نسخ</button>
+        </div>
+        <pre>from pymongo import MongoClient
+
+# الاتصال بـ Atlas
+client = MongoClient("mongodb+srv://user:pass@cluster.xxxxx.mongodb.net/")
+
+# اختيار قاعدة البيانات
+db = client["company"]
+
+# اختيار المجموعة
+employees = db["employee"]</pre>
+      </div>
+    </div>
+
+    <div class="lec-section">
+      <div class="lec-section-title">🔧 عمليات CRUD في بايثون</div>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">Python — CRUD مع PyMongo</span>
+          <button class="copy-btn" onclick="copyCode(this)">نسخ</button>
+        </div>
+        <pre>import pymongo
+
+# إدراج
+result = employees.insert_one({"ssn": "1234", "fname": "Ahmed", "dno": 5})
+
+# الإدراج مع معالجة خطأ التكرار
+try:
+    employees.insert_many([
+        {"ssn": "5678", "fname": "Sara"},
+        {"ssn": "9012", "fname": "Omar"}
+    ])
+except pymongo.errors.BulkWriteError as e:
+    print(f"Duplicate Key Error: {e.details}")
+
+# تحديث
+result = employees.update_many(
+    {"dno": 5},          # الفلتر
+    {"$set": {"salary": 28000}}  # التعديل
+)
+print(f"Modified: {result.modified_count}")
+
+# حذف
+result = employees.delete_one({"ssn": "1234"})
+print(f"Deleted: {result.deleted_count}")
+
+# بحث مع ترتيب وإسقاط
+cursor = employees.find(
+    {"dno": 8},
+    {"fname": 1, "salary": 1, "_id": 0}
+).sort("salary", pymongo.DESCENDING).limit(5)
+
+for emp in cursor:
+    print(emp)</pre>
+      </div>
+    </div>
+
+    <div class="lec-section">
+      <div class="lec-section-title">📑 الفهارس في بايثون</div>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">Python — Indexes</span>
+          <button class="copy-btn" onclick="copyCode(this)">نسخ</button>
+        </div>
+        <pre>import pymongo
+
+# إنشاء فهرس مركب
+db.project.create_index(
+    [("pnumber", 1), ("Pname", -1)],  # tuples للحقول والاتجاه
+    name="pno_name"
+)
+
+# فهرس فريد
+db.employee.create_index(
+    [("ssn", 1)],
+    unique=True,
+    name="ssn_unique"
+)
+
+# عرض الفهارس
+indexes = db.project.list_indexes()
+for idx in indexes:
+    print(idx)</pre>
+      </div>
+      <div class="expert-note">
+        <div class="expert-label">🏆 الفرق بين JS وPython في الفهارس</div>
+        <p>في JavaScript تُمرر الحقول كـ <span class="inline-code">Object</span> مباشرة. في Python تُمررها كـ <strong>قائمة من tuples</strong> لأن Python dicts لا تضمن الترتيب في الإصدارات القديمة. استخدم دائمًا <span class="inline-code">[("field", direction), ...]</span> في PyMongo.</p>
+      </div>
+    </div>
+
+    <div class="lec-section">
+      <div class="lec-section-title">🔄 Aggregation في بايثون</div>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">Python — Aggregation Pipeline</span>
+          <button class="copy-btn" onclick="copyCode(this)">نسخ</button>
+        </div>
+        <pre>pipeline = [
+    {"$group": {
+        "_id": "$dno",
+        "avgSalary": {"$avg": "$salary"},
+        "count": {"$sum": 1}
+    }},
+    {"$match": {"count": {"$gt": 2}}},
+    {"$sort": {"avgSalary": -1}}
+]
+
+results = list(db.employee.aggregate(pipeline))
+for doc in results:
+    print(doc)</pre>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     QUIZ SUMMARY
+════════════════════════════════════════════════════════ -->
+<div class="lecture" id="quiz-summary">
+  <div class="lecture-header">
+    <span class="lecture-num">ملخص</span>
+    <span class="lecture-title">أسئلة الكويزات — إجابات موثقة</span>
+    <span class="lecture-badge badge-quiz">كويز</span>
+  </div>
+  <div class="lecture-body">
+
+    <div class="lec-section">
+      <div class="lec-section-title">🎯 القواعد الأساسية للإجابة الصحيحة</div>
+      <div class="tip-box note">
+        <p><strong>📌 قاعدة الفلتر الصحيح:</strong> <span class="inline-code">{"field": {$operator: value}}</span> — المفتاح دائمًا بين تنصيص، والعامل يبدأ بـ $ داخل كائن.</p>
+      </div>
+    </div>
+
+    <div class="quiz-card">
+      <div class="quiz-label">🧩 أسئلة متكررة وإجاباتها</div>
+
+      <div class="q-item">
+        <div class="q-text"><strong>س:</strong> ما الفلتر الصحيح لـ $or مع $gte و $lte؟</div>
+        <div class="q-answer">{$or: [{"dno": {$gte:14, $lte:16}}, {salary:25000}]}</div>
+      </div>
+
+      <div class="q-item">
+        <div class="q-text"><strong>س:</strong> صيغة find الصحيحة للبحث بقسم معين؟</div>
+        <div class="q-answer">db.employee.find({"dno": 8})</div>
+      </div>
+
+      <div class="q-item">
+        <div class="q-text"><strong>س:</strong> صيغة insertOne الصحيحة؟</div>
+        <div class="q-answer">db.sales.insertOne({ "item": "abc", "price": "20"})</div>
+      </div>
+
+      <div class="q-item">
+        <div class="q-text"><strong>س:</strong> صيغة deleteOne الصحيحة؟</div>
+        <div class="q-answer">db.sales.deleteOne( {"_id": 1} )</div>
+      </div>
+
+      <div class="q-item">
+        <div class="q-text"><strong>س:</strong> صيغة createIndex مركب بالاسم؟</div>
+        <div class="q-answer">db.project.createIndex({pnumber:1, Pname:-1}, {name: "pno_name"})</div>
+      </div>
+
+      <div class="q-item">
+        <div class="q-text"><strong>س:</strong> صيغة sort تنازلي على الراتب؟</div>
+        <div class="q-answer">db.employee.find({"dno":8}).sort({"salary": -1})</div>
+      </div>
+
+      <div class="q-item">
+        <div class="q-text"><strong>س:</strong> $and مع حقلين بشرط واحد؟</div>
+        <div class="q-answer">db.employee.find({ $and:[{"dno": 8},{"gender": "M"}] })</div>
+      </div>
+
+      <div class="q-item">
+        <div class="q-text"><strong>س:</strong> updateMany مع $set و $or — أي "None of the above" صحيحة؟</div>
+        <div class="q-answer">d) None of the above — جميع الخيارات الأخرى غالبًا صحيحة</div>
+      </div>
+    </div>
+
+    <div class="tip-box warning">
+      <p><strong>⚠️ تنبيه مهم لأسئلة "None of the above":</strong> عندما تظهر هذه الإجابة، تحقق بعناية — أحيانًا تكون جميع الخيارات أ، ب، ج صحيحة ومكافئة، فتكون "None of the above" هي الإجابة الوحيدة الخاطئة المنطقيًا!</p>
+    </div>
+
+  </div>
+</div>
+
+<!-- Footer -->
+<div style="text-align:center; padding: 32px; color: var(--muted); font-size: 12px; border-top: 1px solid var(--border); margin-top: 20px;">
+  <p>📚 ملاحظات محاضرات NoSQL / MongoDB — مُعدّة أكاديميًا للطلاب</p>
+  <p style="margin-top:4px;">كل الأمثلة مستخرجة من مواد الكورس الأصلية مع إضافات وتوضيحات خبراء</p>
+</div>
+
+</div><!-- /wrapper -->
+
+<script>
+function printPDF() {
+  const btn = document.querySelector('.btn-pdf');
+  btn.textContent = '⏳ جارٍ التحضير...';
+  setTimeout(() => {
+    window.print();
+    btn.textContent = '🖨️ طباعة / PDF';
+  }, 300);
+}
+
+function copyCode(btn) {
+  const pre = btn.closest('.code-block').querySelector('pre');
+  navigator.clipboard.writeText(pre.textContent.trim()).then(() => {
+    const orig = btn.textContent;
+    btn.textContent = '✅ تم!';
+    setTimeout(() => { btn.textContent = orig; }, 1500);
+  });
+}
+</script>
+</body>
+</html>
+
+</body></html>
